@@ -1,0 +1,243 @@
+import customtkinter as ctk
+import os
+import shutil
+import threading
+import time
+from datetime import datetime
+
+# --- Constants & Configuration ---
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("dark-blue")
+
+# Extension Mapping (matching the React app constants)
+FILE_CATEGORIES = {
+    'Videolar': ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv'],
+    'Muzik_Ses': ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'],
+    'Gorseller': ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'heic', 'webp'],
+    'Belgeler': ['pdf', 'docx', 'txt', 'xlsx', 'pptx', 'csv'],
+    'Arsivler': ['zip', 'rar', '7z', 'tar', 'gz'],
+    'Kurulum_Dosyalari': ['exe', 'msi', 'iso']
+}
+
+# Invert map for easy lookup
+EXTENSION_MAP = {}
+for category, extensions in FILE_CATEGORIES.items():
+    for ext in extensions:
+        EXTENSION_MAP[ext] = category
+
+OTHER_CATEGORY = 'Diger_Dosyalar'
+
+class SmartFileOrganizerApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        # Window Setup
+        self.title("Smart File Organizer")
+        self.geometry("900x700")
+        self.resizable(False, False)
+
+        # State Variables
+        self.selected_directory = ""
+        self.is_processing = False
+        self.stats = {'total': 0, 'processed': 0, 'moved': 0, 'skipped': 0, 'errors': 0}
+        
+        # --- UI Layout ---
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        self.main_frame = ctk.CTkFrame(self, corner_radius=15)
+        self.main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+
+        # 1. Header
+        self.header_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.header_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+        
+        self.logo_label = ctk.CTkLabel(self.header_frame, text="Smart File Organizer", font=("Roboto", 24, "bold"))
+        self.logo_label.pack(side="left")
+        
+        self.subtitle_label = ctk.CTkLabel(self.header_frame, text="Organize your chaotic folders in seconds", font=("Roboto", 12), text_color="gray")
+        self.subtitle_label.pack(side="left", padx=10, pady=(8,0))
+
+        # 2. Folder Selection
+        self.selection_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.selection_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
+        
+        self.path_entry = ctk.CTkEntry(self.selection_frame, placeholder_text="No folder selected...", width=600, state="readonly")
+        self.path_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        
+        self.browse_btn = ctk.CTkButton(self.selection_frame, text="Select Folder", command=self.select_folder, width=120, height=35)
+        self.browse_btn.pack(side="right")
+
+        # 3. Stats Grid
+        self.stats_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.stats_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+        self.stats_frame.grid_columnconfigure((0,1,2,3), weight=1)
+
+        self.stat_processed = self.create_stat_box(self.stats_frame, 0, "PROCESSED", "0 / 0", "gray")
+        self.stat_moved = self.create_stat_box(self.stats_frame, 1, "MOVED", "0", "#10b981") # Emerald
+        self.stat_errors = self.create_stat_box(self.stats_frame, 2, "ERRORS", "0", "#ef4444") # Red
+        self.stat_skipped = self.create_stat_box(self.stats_frame, 3, "SKIPPED", "0", "#eab308") # Yellow
+
+        # 4. Progress Section
+        self.progress_frame = ctk.CTkFrame(self.main_frame, fg_color=("gray90", "gray16"), corner_radius=10)
+        self.progress_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=10)
+        
+        self.status_label = ctk.CTkLabel(self.progress_frame, text="Ready", font=("Roboto", 12))
+        self.status_label.pack(anchor="w", padx=10, pady=(5,0))
+        
+        self.progress_bar = ctk.CTkProgressBar(self.progress_frame, height=12)
+        self.progress_bar.pack(fill="x", padx=10, pady=(5,10))
+        self.progress_bar.set(0)
+
+        # 5. Action Button
+        self.start_btn = ctk.CTkButton(self.main_frame, text="Start Organization", command=self.start_processing_thread, 
+                                       width=200, height=50, font=("Roboto", 16, "bold"),
+                                       fg_color="#059669", hover_color="#047857")
+        self.start_btn.grid(row=4, column=0, pady=10)
+        self.start_btn.configure(state="disabled")
+
+        # 6. Logs
+        self.log_label = ctk.CTkLabel(self.main_frame, text="System Logs", font=("Roboto", 12, "bold"))
+        self.log_label.grid(row=5, column=0, sticky="w", padx=20, pady=(10,0))
+
+        self.log_box = ctk.CTkTextbox(self.main_frame, height=150, font=("Consolas", 12))
+        self.log_box.grid(row=6, column=0, sticky="nsew", padx=20, pady=(5, 20))
+        self.log_box.configure(state="disabled")
+
+        self.add_log("Welcome! Please select a source directory to begin.")
+
+    def create_stat_box(self, parent, col, title, value, color):
+        frame = ctk.CTkFrame(parent, fg_color=("gray85", "gray17"))
+        frame.grid(row=0, column=col, sticky="ew", padx=5)
+        
+        title_lbl = ctk.CTkLabel(frame, text=title, font=("Roboto", 10, "bold"), text_color=color)
+        title_lbl.pack(pady=(5,0))
+        
+        value_lbl = ctk.CTkLabel(frame, text=value, font=("Roboto", 20, "bold"))
+        value_lbl.pack(pady=(0,5))
+        return value_lbl
+
+    def add_log(self, message, log_type="INFO"):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        full_msg = f"[{timestamp}] [{log_type}] {message}\n"
+        
+        self.log_box.configure(state="normal")
+        self.log_box.insert("end", full_msg)
+        self.log_box.see("end")
+        self.log_box.configure(state="disabled")
+
+    def select_folder(self):
+        folder_selected = ctk.filedialog.askdirectory()
+        if folder_selected:
+            self.selected_directory = folder_selected
+            self.path_entry.configure(state="normal")
+            self.path_entry.delete(0, "end")
+            self.path_entry.insert(0, self.selected_directory)
+            self.path_entry.configure(state="readonly")
+            
+            self.start_btn.configure(state="normal")
+            self.add_log(f"Selected directory: {self.selected_directory}", "SUCCESS")
+            
+            # Reset stats
+            self.stats = {'total': 0, 'processed': 0, 'moved': 0, 'skipped': 0, 'errors': 0}
+            self.update_stats_ui()
+            self.progress_bar.set(0)
+            self.status_label.configure(text="Ready")
+
+    def update_stats_ui(self):
+        self.stat_processed.configure(text=f"{self.stats['processed']} / {self.stats['total']}")
+        self.stat_moved.configure(text=str(self.stats['moved']))
+        self.stat_errors.configure(text=str(self.stats['errors']))
+        self.stat_skipped.configure(text=str(self.stats['skipped']))
+
+    def get_unique_filename(self, directory, filename):
+        name, ext = os.path.splitext(filename)
+        counter = 1
+        new_filename = filename
+        while os.path.exists(os.path.join(directory, new_filename)):
+            new_filename = f"{name}_{counter}{ext}"
+            counter += 1
+        return new_filename
+
+    def start_processing_thread(self):
+        if not self.selected_directory:
+            return
+        
+        self.is_processing = True
+        self.start_btn.configure(state="disabled", text="Processing...")
+        self.browse_btn.configure(state="disabled")
+        
+        threading.Thread(target=self.process_files, daemon=True).start()
+
+    def process_files(self):
+        try:
+            files = [f for f in os.listdir(self.selected_directory) if os.path.isfile(os.path.join(self.selected_directory, f))]
+            self.stats['total'] = len(files)
+            
+            if not files:
+                self.add_log("No files found in the selected directory.", "WARNING")
+                self.finish_processing()
+                return
+
+            self.add_log(f"Found {len(files)} files. Starting organization...", "INFO")
+
+            for i, filename in enumerate(files):
+                # UI Update logic
+                self.status_label.configure(text=f"Moving: {filename}")
+                progress_val = (i + 1) / len(files)
+                self.progress_bar.set(progress_val)
+                self.update_stats_ui()
+
+                # Logic
+                if filename.startswith('.'):
+                    self.stats['skipped'] += 1
+                    self.stats['processed'] += 1
+                    continue
+
+                try:
+                    ext = filename.split('.')[-1].lower() if '.' in filename else ''
+                    category_name = EXTENSION_MAP.get(ext, OTHER_CATEGORY)
+
+                    target_dir = os.path.join(self.selected_directory, category_name)
+                    if not os.path.exists(target_dir):
+                        os.makedirs(target_dir)
+
+                    unique_name = self.get_unique_filename(target_dir, filename)
+                    src_path = os.path.join(self.selected_directory, filename)
+                    dst_path = os.path.join(target_dir, unique_name)
+
+                    shutil.move(src_path, dst_path)
+                    
+                    self.stats['moved'] += 1
+                    msg = f"Moved {filename} to {category_name}"
+                    if unique_name != filename:
+                        msg += f" (Renamed to {unique_name})"
+                    self.add_log(msg, "SUCCESS")
+
+                except Exception as e:
+                    self.stats['errors'] += 1
+                    self.add_log(f"Failed to move {filename}: {str(e)}", "ERROR")
+                
+                self.stats['processed'] += 1
+                # Small delay to make UI updates visible for very small operations
+                time.sleep(0.05) 
+
+            self.status_label.configure(text="Done")
+            self.add_log("Organization completed successfully!", "SUCCESS")
+
+        except Exception as e:
+            self.add_log(f"Critical Error: {str(e)}", "ERROR")
+        
+        finally:
+            self.finish_processing()
+
+    def finish_processing(self):
+        self.is_processing = False
+        self.start_btn.configure(state="normal", text="Start Organization")
+        self.browse_btn.configure(state="normal")
+        self.update_stats_ui()
+
+if __name__ == "__main__":
+    app = SmartFileOrganizerApp()
+    app.mainloop()
