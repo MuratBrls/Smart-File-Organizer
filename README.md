@@ -1,7 +1,10 @@
 # 📂 Smart File Organizer / Akıllı Dosya Düzenleyici
+
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg) ![CustomTkinter](https://img.shields.io/badge/GUI-CustomTkinter-green.svg) ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 [🇹🇷 Türkçe Rehber](#-türkçe-kullanım-rehberi) | [🇺🇸 English Guide](#-english-user-guide)
+
+---
 
 # 🇹🇷 Türkçe Kullanım Rehberi
 
@@ -9,27 +12,26 @@
 
 ## 🚀 Kurulum ve İlk Çalıştırma (Önemli!)
 
-Güvenlik ve dağıtım kolaylığı nedeniyle proje dosyaları `.txt` uzantılı olarak gelmektedir. Uygulamayı çalıştırmak için **ilk kez indirirken** aşağıdaki adımları sırasıyla uygulamanız gerekmektedir:
+**Güvenlik önlemleri nedeniyle**, proje dosyaları varsayılan olarak `.txt` (metin dosyası) formatında sunulmuştur. Uygulamayı çalıştırmak için lütfen aşağıdaki iki dosyayı manuel olarak yeniden adlandırın:
 
-### 1. Dosya Uzantılarını Düzenleme
-İndirdiğiniz klasörde aşağıdaki dosya adı değişikliklerini yapın:
+### 1. Dosya İsimlerini Değiştirme
+İndirdiğiniz klasörün içinde:
 
-1.  Eğer klasörde hali hazırda `main.py` veya `CALISTIR.bat` varsa bunları **silin**.
-2.  **`main.txt`** dosyasının adını 👉 **`main.py`** olarak değiştirin.
-3.  **`CALISTIR.txt`** dosyasının adını 👉 **`CALISTIR.bat`** olarak değiştirin.
+1.  **`main.txt`** dosyasının adını 👉 **`main.py`** yapın.
+2.  **`CALISTIR.txt`** dosyasının adını 👉 **`CALISTIR.bat`** yapın.
 
-*(Not: Windows'ta dosya uzantılarını göremiyorsanız: Dosya Gezgini > Görünüm > "Dosya adı uzantıları" kutucuğunu işaretleyin.)*
+*(İpucu: Eğer dosya uzantılarını göremiyorsanız, klasör penceresinde "Görünüm" sekmesine gidin ve "Dosya adı uzantıları" kutucuğunu işaretleyin.)*
 
 ### 2. Başlatma
-*   **`CALISTIR.bat`** dosyasına çift tıklayın.
-*   Bu işlem otomatik olarak gerekli kütüphaneleri (`customtkinter` vb.) yükleyecek ve uygulamayı başlatacaktır.
+*   İsim değişikliğini yaptıktan sonra **`CALISTIR.bat`** dosyasına çift tıklayın.
+*   Program otomatik olarak gerekli kütüphaneleri yükleyecek ve açılacaktır.
 
 ---
 
 ## 📖 Nasıl Kullanılır?
 
 1.  **Klasör Seçimi:** Sağ üstteki **"Select Folder"** butonuna tıklayın ve düzenlemek istediğiniz dağınık klasörü seçin.
-2.  **Analiz:** Uygulama klasörü tarar ve kaç dosya bulduğunu log ekranında gösterir.
+2.  **Analiz:** Uygulama klasörü tarar ve durumu size bildirir.
 3.  **Başlat:** **"Start Organization"** butonuna basın.
 4.  **Sonuç:** Dosyalarınız türlerine göre ayrıştırılırken ilerleme çubuğunu izleyebilirsiniz.
 
@@ -56,27 +58,26 @@ Uygulama seçilen dizinde şu klasörleri oluşturur ve dosyaları dağıtır:
 
 ## 🚀 Installation & Setup (Important!)
 
-For distribution purposes, the executable scripts are provided as `.txt` files. You must follow these steps to rename them before running the app:
+**Due to security measures**, the executable files are provided as `.txt` (text files). To run the application, you must manually rename the following two files:
 
-### 1. Preparing the Files
-In the project folder, follow these renaming steps:
+### 1. Renaming the Files
+Inside the downloaded folder:
 
-1.  If `main.py` or `CALISTIR.bat` already exist from a previous attempt, **delete them**.
-2.  Rename **`main.txt`** to 👉 **`main.py`**.
-3.  Rename **`CALISTIR.txt`** to 👉 **`CALISTIR.bat`**.
+1.  Rename **`main.txt`** to 👉 **`main.py`**.
+2.  Rename **`CALISTIR.txt`** to 👉 **`CALISTIR.bat`**.
 
-*(Note: If you cannot see file extensions in Windows: File Explorer > View > Check "File name extensions".)*
+*(Tip: If you cannot see file extensions like .txt, go to the "View" tab in your folder window and check "File name extensions".)*
 
 ### 2. Running the App
-*   Double-click on **`CALISTIR.bat`**.
-*   This script will automatically install the required libraries (like `customtkinter`) and launch the application.
+*   After renaming, double-click on **`CALISTIR.bat`**.
+*   This script will automatically install the required libraries and launch the application.
 
 ---
 
 ## 📖 How to Use
 
 1.  **Select Folder:** Click the **"Select Folder"** button at the top right and choose the messy directory you want to organize.
-2.  **Analyze:** The app scans the directory and logs the number of files found.
+2.  **Analyze:** The app scans the directory and prepares for organization.
 3.  **Start:** Click the **"Start Organization"** button.
 4.  **Done:** Watch the progress bar as your files are sorted instantly.
 
@@ -101,4 +102,5 @@ The app creates the following subfolders in your selected directory:
 *   Windows (Recommended for the .bat script), but `main.py` works on macOS/Linux if dependencies are installed manually.
 
 ## 📜 License
-MIT License. Free to use and modify.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright (c) 2025 Murat
