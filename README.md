@@ -72,8 +72,6 @@ Inside the downloaded folder:
 *   After renaming, double-click on **`CALISTIR.bat`**.
 *   This script will automatically install the required libraries and launch the application.
 
----
-
 ## 📖 How to Use
 
 1.  **Select Folder:** Click the **"Select Folder"** button at the top right and choose the messy directory you want to organize.
