@@ -1,10 +1,7 @@
 # 📂 Smart File Organizer / Akıllı Dosya Düzenleyici
-
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg) ![CustomTkinter](https://img.shields.io/badge/GUI-CustomTkinter-green.svg) ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 [🇹🇷 Türkçe Rehber](#-türkçe-kullanım-rehberi) | [🇺🇸 English Guide](#-english-user-guide)
-
----
 
 # 🇹🇷 Türkçe Kullanım Rehberi
 
