@@ -72,6 +72,7 @@ Inside the downloaded folder:
 *   After renaming, double-click on **`CALISTIR.bat`**.
 *   This script will automatically install the required libraries and launch the application.
 
+---
 
 ## 📖 How to Use
 
@@ -101,5 +102,5 @@ The app creates the following subfolders in your selected directory:
 *   Windows (Recommended for the .bat script), but `main.py` works on macOS/Linux if dependencies are installed manually.
 
 ## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
 Copyright (c) 2025 Murat
