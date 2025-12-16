@@ -72,7 +72,6 @@ Inside the downloaded folder:
 *   After renaming, double-click on **`CALISTIR.bat`**.
 *   This script will automatically install the required libraries and launch the application.
 
----
 
 ## 📖 How to Use
 
